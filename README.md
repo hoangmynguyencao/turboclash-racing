@@ -2,7 +2,7 @@
 
 Game đua xe đối kháng 2 người thời gian thực được xây dựng bằng **Lập trình Socket (WebSocket / Python Socket Server)** chạy trong cùng 1 server mạng nội bộ. Trò chơi hỗ trợ đa nền tảng, có thể chơi mượt mà trên **cả Máy tính (PC/Laptop) và Điện thoại thông minh (iOS/Android)** với **10 Levels độ khó tăng dần**.
 
-Máy 1 truy cập vào link: https://turboclash-racing.onrender.com để chơi
+Máy 1 truy cập vào link: https://turboclash-racing.onrender.com để chơi; 
 Máy 2 truy cập link mời vào phòng hiện trên máy 1 (vd: https://turboclash-racing.onrender.com/?room=ROOM-1 ) hoặc mã QR hiển thị
 ---
 
