@@ -60,41 +60,57 @@ Game đua xe đối kháng 2 người thời gian thực được xây dựng b�
 
 ---
 
-## 🚀 HƯỚNG DẪN CÀI ĐẶT & CHẠY GAME
+---
 
-### Bước 1: Khởi động máy chủ Server
-Mở thư mục `D:\Game`, bạn có 2 cách khởi động:
-- **Cách 1 (Nhanh nhất):** Nhấp đúp chuột vào file `run_game.bat`.
-- **Cách 2 (Dùng lệnh Command Prompt / PowerShell):**
-  ```powershell
-  cd D:\Game
-  py server.py
-  ```
+## 🌐 HƯỚNG DẪN TRIỂN KHAI LÊN INTERNET (CÓ TÊN MIỀN MIỄN PHÍ)
 
-Khi server khởi chạy, màn hình console sẽ hiển thị thông tin như sau:
-```text
-=================================================================
-  🏎️  TURBO CLASH 2P - MULTIPLAYER SOCKET RACING SERVER  🏁
-=================================================================
-[*] HTTP Server đang chạy tại:   http://0.0.0.0:8000
-[*] WebSocket Server chạy tại:   ws://0.0.0.0:8765
------------------------------------------------------------------
-  HƯỚNG DẪN KẾT NỐI 2 THIẾT BỊ (CÙNG MẠNG WI-FI / LAN):
-  • MÁY 1 (PC Máy chủ):       http://localhost:8000
-  • MÁY 2 (PC/Laptop khác):   http://192.168.x.x:8000
-  • ĐIỆN THOẠI (iOS/Android): http://192.168.x.x:8000
-=================================================================
-```
+Game đã được tối ưu hóa thành **Kiến trúc Server hợp nhất (Unified aiohttp)**: Chạy cả Web (HTTP) và Socket (WSS) trên **cùng 1 cổng duy nhất**. Người chơi chỉ cần duy nhất **1 đường link tên miền**, không cần nhập IP, không cần cài đặt gì thêm!
 
-### Bước 2: Vào chơi từ 2 thiết bị
-1. **Thiết bị 1 (PC máy chủ):**
-   - Mở trình duyệt Web (Chrome, Edge, Firefox), truy cập: `http://localhost:8000`
-   - Nhập tên của bạn, chọn thiết bị `🖥️ Máy tính`, bấm **VÀO PHÒNG ĐUA**.
-2. **Thiết bị 2 (Điện thoại hoặc Laptop khác cùng mạng Wi-Fi):**
-   - **Cách A (Quét mã):** Mở camera điện thoại quét mã QR hiển thị trên màn hình PC máy chủ.
-   - **Cách B (Nhập link):** Mở trình duyệt trên điện thoại/máy 2 và nhập địa chỉ IP hiển thị (Ví dụ: `http://192.168.0.102:8000`).
-   - Nhập tên, bấm **VÀO PHÒNG ĐUA**.
-3. **Cả 2 người chơi cùng bấm "SẴN SÀNG ĐUA !"** -> Trò chơi sẽ đếm ngược **3... 2... 1... GO!** và bắt đầu cuộc đua rực lửa!
+### 🌟 Cơ Chế Tự Động Ưu Tiên Máy Chủ (Host Priority):
+- **Người vào bằng Máy tính (PC / Laptop):** Trang web tự động nhận diện thiết bị, ưu tiên cấp quyền **👑 MÁY CHỦ (Host - Xe Đỏ P1)**. Máy tính tự động tạo phòng, sinh mã QR và link mời có gắn mã phòng.
+- **Người chơi thứ 2 (Điện thoại hoặc Máy tính khác):** Chỉ cần quét mã QR bằng camera điện thoại hoặc click vào link tên miền (`https://.../?room=ROOM-1`). Trang web tự động nhận diện và kết nối vào phòng với tư cách **⚡ NGƯỜI CHƠI 2 (Khách - Xe Xanh P2)**!
+
+---
+
+### 🚀 CÁCH TRIỂN KHAI LÊN RENDER.COM (100% MIỄN PHÍ, CÓ TÊN MIỀN NGAY):
+
+Render.com cho phép chạy Server Python + WebSocket 24/7 hoàn toàn miễn phí và tự động cấp subdomain theo tên game đua xe (Ví dụ: `https://turboclash-racing.onrender.com`).
+
+#### Bước 1: Đẩy mã nguồn lên GitHub (Miễn phí)
+1. Mở trình duyệt, đăng nhập vào [GitHub](https://github.com) và tạo một Repository mới tên là `turboclash-racing` (chọn Public).
+2. Mở PowerShell trong thư mục `D:\Game` và chạy lệnh kết nối (thay `username` bằng tài khoản GitHub của bạn):
+   ```powershell
+   git remote add origin https://github.com/<username>/turboclash-racing.git
+   git branch -M main
+   git push -u origin main
+   ```
+
+#### Bước 2: Tạo Web Service trên Render.com
+1. Truy cập [render.com](https://render.com) và đăng nhập bằng tài khoản GitHub của bạn.
+2. Bấm nút **New +** ở góc trên bên phải -> Chọn **Web Service**.
+3. Chọn Repository `turboclash-racing` bạn vừa tạo.
+4. Điền các thông tin:
+   - **Name:** `turboclash-racing` (hoặc tên bất kỳ bạn thích liên quan đến đua xe, ví dụ: `dua-xe-toc-do`). Tên này sẽ chính là tên miền: `https://turboclash-racing.onrender.com`.
+   - **Language:** `Python 3`
+   - **Build Command:** `pip install -r requirements.txt`
+   - **Start Command:** `python server.py`
+   - **Instance Type:** `Free` ($0/month)
+5. Bấm **Deploy Web Service**!
+6. Đợi khoảng 1-2 phút, Render sẽ hoàn tất và hiển thị đường link tên miền chính thức của bạn (Ví dụ: `https://turboclash-racing.onrender.com`).
+
+#### Bước 3: Vào chơi ngay từ bất kỳ đâu!
+1. **Máy tính:** Mở link `https://turboclash-racing.onrender.com` -> Web tự động nhận diện là PC và làm Máy chủ, hiển thị mã QR trên màn hình.
+2. **Điện thoại:** Mở camera quét mã QR hoặc mở link `https://turboclash-racing.onrender.com/?room=ROOM-1` -> Vào thẳng phòng đối đầu với PC!
+3. Cả 2 bấm **SẴN SÀNG ĐUA !** và bắt đầu tranh tài 10 Levels!
+
+---
+
+## 💻 HOẶC CHẠY TRỰC TIẾP TRÊN MÁY TÍNH (OFFLINE / LAN)
+
+Nếu muốn chơi nhanh trong nhà mà chưa cần đẩy lên Render:
+1. Nhấp đúp chuột vào file `run_game.bat` (hoặc chạy lệnh `py server.py`).
+2. Mở trình duyệt truy cập: `http://localhost:8000`.
+3. Người thứ 2 quét mã QR trên màn hình hoặc nhập `http://<IP-may-tinh>:8000` để vào đua.
 
 ---
 
