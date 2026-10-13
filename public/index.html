@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Turbo Clash 2P - Đua Xe 2 Người Qua Socket (10 Levels)</title>
+    <link rel="stylesheet" href="css/style.css">
+    <meta name="description" content="Game đua xe có chướng ngại vật 2 người chơi qua Socket trên máy tính và điện thoại. 10 Levels độ khó tăng dần.">
+</head>
+<body>
+
+    <!-- Canvas Game Chính 60 FPS -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- GIAO DIỆN PHÒNG CHỜ (LOBBY & MATCHMAKING) -->
+    <div id="lobbyOverlay">
+        <div class="lobby-container">
+            <div class="lobby-header">
+                <h1>TURBO CLASH 2P</h1>
+                <p>Đua xe đối kháng 2 người qua mạng nội bộ Socket • 10 Levels Thử Thách</p>
+            </div>
+
+            <!-- Khung 1: Điền thông tin vào phòng -->
+            <div id="loginCard" class="card-section">
+                <!-- Thông báo vai trò ưu tiên Máy chủ (PC) / Khách (Mobile) -->
+                <div id="roleBadgeBox" class="role-badge-box">
+                    <div id="roleBadgeText" class="role-badge host">👑 ƯU TIÊN MÁY CHỦ (PC) - TỰ ĐỘNG KHỞI TẠO PHÒNG</div>
+                    <p id="roleBadgeSub" class="role-sub">Bạn đang dùng Máy tính. Bạn sẽ làm Máy chủ (Xe Đỏ - P1) để người chơi 2 kết nối bằng link tên miền.</p>
+                </div>
+
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label for="roomInput">Mã Phòng (Room Code)</label>
+                        <input type="text" id="roomInput" value="ROOM-1" placeholder="Ví dụ: ROOM-1">
+                    </div>
+                    <div class="input-group">
+                        <label for="nameInput">Tên Tay Đua</label>
+                        <input type="text" id="nameInput" placeholder="Nhập tên của bạn...">
+                    </div>
+                    <div class="input-group">
+                        <label for="deviceType">Thiết Bị Đang Dùng</label>
+                        <select id="deviceType">
+                            <option value="PC">🖥️ Máy tính (Bàn phím)</option>
+                            <option value="Mobile">📱 Điện thoại (Cảm ứng)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Box hiển thị link và QR code để người chơi 2 kết nối qua tên miền -->
+                <div class="lan-info-box">
+                    <div class="lan-info-text">
+                        <h3>🌐 MỜI NGƯỜI CHƠI 2 (ĐIỆN THOẠI HOẶC MÁY TÍNH):</h3>
+                        <p>Quét mã QR bằng camera điện thoại hoặc sao chép link tên miền gửi cho bạn bè để vào đua ngay:</p>
+                        <div class="lan-url-badge">
+                            <span id="lanUrlText">Đang tạo link...</span>
+                            <button id="btnCopyLink" class="btn-small">Sao chép link</button>
+                        </div>
+                    </div>
+                    <div class="qr-box">
+                        <canvas id="qrCanvas" width="130" height="130"></canvas>
+                    </div>
+                </div>
+
+                <button id="btnJoin" class="btn-primary">VÀO PHÒNG ĐUA 🏎️</button>
+            </div>
+
+            <!-- Khung 2: Phòng chờ khi cả 2 đã kết nối -->
+            <div id="lobbyCard" class="card-section" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 700; color: var(--neon-amber);">PHÒNG: <span id="displayRoomCode" style="color: #fff;">ROOM-1</span></span>
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">Yêu cầu 2 người cùng SẴN SÀNG để bắt đầu đua</span>
+                </div>
+
+                <!-- Thẻ 2 người chơi đối đầu -->
+                <div class="players-versus-grid">
+                    <div id="player1Card" class="player-card p1">
+                        <div class="car-avatar">🏎️</div>
+                        <div class="player-name">Tay đua 1 (Đỏ)</div>
+                        <div class="player-device">🖥️ Máy tính</div>
+                        <div class="player-status waiting">CHƯA SẴN SÀNG</div>
+                    </div>
+
+                    <div class="vs-badge">VS</div>
+
+                    <div id="player2Card" class="player-card p2 empty">
+                        <div class="car-avatar">🏎️</div>
+                        <div class="player-name">Đang chờ Người chơi 2...</div>
+                        <div class="player-device"></div>
+                        <div class="player-status waiting">CHƯA VÀO</div>
+                    </div>
+                </div>
+
+                <!-- Box mời Người Chơi 2 trong phòng chờ -->
+                <div id="lobbyInviteBox" class="lan-info-box lobby-invite-box">
+                    <div class="lan-info-text">
+                        <h3>📲 MỜI NGƯỜI CHƠI 2 VÀO PHÒNG:</h3>
+                        <p>Quét mã QR bằng camera điện thoại hoặc copy link tên miền gửi cho bạn bè:</p>
+                        <div class="lan-url-badge">
+                            <span id="lobbyInviteUrl">Đang tải link...</span>
+                            <button id="btnCopyLobbyLink" class="btn-small">Sao chép link</button>
+                        </div>
+                    </div>
+                    <div class="qr-box">
+                        <canvas id="qrCanvasLobby" width="110" height="110"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chọn nhanh Level (10 Levels) -->
+                <div>
+                    <label style="font-size: 0.85rem; font-weight: 700; color: var(--neon-blue);">CHỌN MÀN CHƠI (10 LEVELS):</label>
+                    <div id="levelList" class="levels-scroll"></div>
+                </div>
+
+                <button id="btnReady" class="btn-ready">SẴN SÀNG ĐUA ! 🏁</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GIAO DIỆN TRONG TRẬN ĐUA (IN-GAME HUD) -->
+    <div id="gameHUD">
+        <!-- Hàng trên: Thông tin Level & Mini-map -->
+        <div class="hud-top-bar">
+            <div class="hud-panel level-badge-box">
+                <h2 id="hudLevelNum">LEVEL 1 / 10</h2>
+                <p id="hudLevelTitle">Cao Tốc Khởi Động</p>
+            </div>
+
+            <!-- Thanh Mini-map Quãng đường đua -->
+            <div class="track-progress-container">
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted);">
+                    <span>XUẤT PHÁT</span>
+                    <span id="hudTimer" style="font-family: 'Orbitron', monospace; color: #fff; font-weight: 700;">00:00.00</span>
+                    <span>ĐÍCH</span>
+                </div>
+                <div class="progress-track-line">
+                    <div id="miniMyCar" class="progress-marker marker-p1" style="left: 0%;"></div>
+                    <div id="miniOppCar" class="progress-marker marker-p2" style="left: 0%;"></div>
+                    <div class="marker-finish">🏁</div>
+                </div>
+                <div id="hudGap" class="gap-indicator"><span>Ngang hàng: 0m</span></div>
+            </div>
+
+            <div class="hud-actions">
+                <button id="btnSound" class="hud-btn" title="Bật/Tắt âm thanh">🔊 Âm thanh</button>
+                <button id="btnFullscreen" class="hud-btn" title="Toàn màn hình">⛶ Phóng to</button>
+                <button id="btnToggleTouch" class="hud-btn" title="Bật/tắt phím cảm ứng">📱 Phím ảo</button>
+                <div id="hudPing" class="hud-btn ping-good">-- ms</div>
+            </div>
+        </div>
+
+        <!-- Hàng dưới: Tốc kế, Nitro, Máu, Biểu cảm -->
+        <div class="hud-bottom-bar">
+            <!-- Tốc kế điện tử -->
+            <div class="speedometer-card">
+                <div class="speed-gauge-wrap">
+                    <svg class="gauge-svg" viewBox="0 0 100 100">
+                        <circle class="gauge-bg" cx="50" cy="50" r="42" />
+                    </svg>
+                    <div id="gaugeNeedle" class="gauge-needle"></div>
+                </div>
+                <div class="speed-digital">
+                    <div class="speed-num" id="hudSpeedNum">0</div>
+                    <div class="speed-unit">KM/H</div>
+                    <div class="gear-badge" id="hudGear">GEAR: N</div>
+                </div>
+            </div>
+
+            <!-- Thanh đo Nitro & Độ bền -->
+            <div class="bars-card">
+                <div class="bar-row">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span class="bar-label">NITRO (SPACE / 🚀)</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div id="hudNitroBar" class="bar-fill-nitro"></div>
+                    </div>
+                </div>
+                <div class="bar-row">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span class="bar-label">ĐỘ BỀN XE</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div id="hudHealthBar" class="bar-fill-health"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thanh biểu cảm nhanh (Emotes) -->
+            <div class="emotes-card">
+                <button class="emote-btn" data-emote="🔥" title="Lửa">🔥</button>
+                <button class="emote-btn" data-emote="🚀" title="Phóng">🚀</button>
+                <button class="emote-btn" data-emote="💨" title="Bụi">💨</button>
+                <button class="emote-btn" data-emote="⚠️" title="Cảnh báo">⚠️</button>
+                <button class="emote-btn" data-emote="🏆" title="Cúp">🏆</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PHÍM CẢM ỨNG TRÊN MÀN HÌNH ĐIỆN THOẠI -->
+    <div id="touchControls">
+        <!-- Cụm bẻ lái (Trái / Phải) -->
+        <div class="touch-cluster-left">
+            <button id="btnSteerLeft" class="touch-btn" aria-label="Rẽ trái">◄<span>TRÁI</span></button>
+            <button id="btnSteerRight" class="touch-btn" aria-label="Rẽ phải">►<span>PHẢI</span></button>
+        </div>
+
+        <!-- Cụm Tăng ga / Phanh / Nitro -->
+        <div class="touch-cluster-right">
+            <button id="btnNitro" class="touch-btn btn-touch-nitro" aria-label="Nitro">🚀<span>NITRO</span></button>
+            <button id="btnBrake" class="touch-btn btn-touch-brake" aria-label="Phanh">🛑<span>PHANH</span></button>
+            <button id="btnGas" class="touch-btn btn-touch-gas" aria-label="Tăng ga">⚡<span>GA</span></button>
+        </div>
+    </div>
+
+    <!-- MODAL KẾT QUẢ MÀN CHƠI (LEVEL FINISHED) -->
+    <div id="finishModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="finishTitle">🏁 VỀ ĐÍCH! 🏁</h2>
+            <div id="finishDetails" style="margin: 16px 0; font-size: 1.1rem; line-height: 1.8;"></div>
+            <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
+                <button id="btnNextLevel" class="btn-primary" style="flex: 1;">TIẾP TỤC LEVEL TIẾP ⏩</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL VÔ ĐỊCH TOÀN DIỆN 10 LEVELS (GRAND CHAMPION) -->
+    <div id="championModal" class="modal-overlay">
+        <div class="modal-content">
+            <div style="font-size: 4rem; margin-bottom: 10px;">🏆</div>
+            <h2 id="championTitle">NHÀ VÔ ĐỊCH GRAND PRIX!</h2>
+            <p id="championScores" style="margin: 14px 0; font-size: 1.2rem; color: var(--neon-amber);"></p>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px;">Bạn đã hoàn thành xuất sắc toàn bộ 10 Levels thử thách khắc nghiệt!</p>
+            <button id="btnRestart" class="btn-primary" style="width: 100%;">CHƠI LẠI TỪ LEVEL 1 🔄</button>
+        </div>
+    </div>
+
+    <!-- Script nạp theo đúng thứ tự logic -->
+    <script src="js/qrcode.js"></script>
+    <script src="js/levels.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/socket.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/ui.js"></script>
+</body>
+</html>
